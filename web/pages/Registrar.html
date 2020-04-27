@@ -24,7 +24,7 @@
 
 
 
-<body onload="observador();">	
+<body">	
     <!-- Inicia Cabecera -->
 	<nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
 		<div class="container-fluid">
@@ -239,7 +239,12 @@
 	<script src="js/jquery-1.11.1.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/bootstrap-datepicker.js"></script>
-    <script src="js/custom.js"></script>
+	<script src="js/custom.js"></script>
+	<script>
+    	window.onload = function (){
+    		observador();
+		};
+	</script>
     
 		
 </body>
