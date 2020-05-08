@@ -3,6 +3,12 @@ from uuid import getnode as get_mac
 import datetime
 import os
 
+# Funcion que envia confirmación de ejecución
+def ResponseSwitch():
+    # Conecta con la base de datos en Firebase
+    firebase.put('/switch_serv', 'resultado','Response')
+
+
 os.system('pkill -f DHT11_firebase.py')
 firebase = firebase.FirebaseApplication("https://syspred-f1a54.firebaseio.com/", None)
 
@@ -19,3 +25,8 @@ log = {
 
 # con el metodo post, registra los nuevos datos en la coleccion temperatura_humedad
 resultlog = firebase.post("/auditoria", log)
+
+ResponseSwitch()
+
+# con el metodo post, actualiza los nuevos datos en la coleccion temperatura_humedad
+firebase.put('/temperatura_humedad_actual/1', 'CantLecturas',int(0))
