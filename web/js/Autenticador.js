@@ -13,6 +13,22 @@ var firebaseConfig = {
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
 
+
+// ******************************************************************************
+// *      Funciones Globales JS que pueden ser usados por otras funciones       *
+// ******************************************************************************
+
+// Función que toma el valor de cada id de los elementos en la pagina por Ej: los Id de los elementos input
+function getID(id){
+    return document.getElementById(id).value;
+}
+
+
+function innerHTML(id,result){
+    return document.getElementById(id).innerHTML=result;
+}
+
+
 // ******************************************************************************
 // *              Funciones JS Para la autenticación con Firebase               *
 // ******************************************************************************
@@ -153,11 +169,6 @@ function cerrar_sesion(){
 // *       Funciones JS para la consulta e ingreso de datos en Firebase         *
 // ******************************************************************************
 
-// Función que toma el valor de cada id de los elementos en la pagina por Ej: los Id de los elementos input
-function getID(id){
-    return document.getElementById(id).value;
-}
-
 // Función que toma los valores del formulario de registro y valida si son nulos
 function IngresaValoresPagRegUsuario(){
     var id = getID("documento");
@@ -217,6 +228,62 @@ function arrayJSONlogin(password,id,Rol,user,correo){
     };
     return data;
 }
+
+
+// ******************************************************************************
+// *           Funciones JS para la consulta de datos de Firebase               *
+// ******************************************************************************
+
+// Funcion que consulta la coleccion temperatura_humedad_actual en firebase
+function ConsultarTemp_Humedad(){
+    var temperatura_humedad_actual = firebase.database().ref("temperatura_humedad_actual/");
+    temperatura_humedad_actual.on("child_changed",function(data){
+        var Valortemperatura_humedad_actual = data.val();
+        console.log(Valortemperatura_humedad_actual);
+        var result = DivClassInicio(Valortemperatura_humedad_actual.temperaturaC,Valortemperatura_humedad_actual.temperaturaF,Valortemperatura_humedad_actual.humedad,Valortemperatura_humedad_actual.CantLecturas);
+        console.log(result);
+        innerHTML("loadTempC",result);
+    });
+}
+
+
+// Reconstruye la seccion del DIV mostrando los datos consultados en Firebase
+
+function DivClassInicio(temperaturaC,temperaturaF,humedad,CantLecturas){
+    return '<div class="col-xs-6 col-md-3 col-lg-3 no-padding">'+
+                '<div class="panel panel-teal panel-widget border-right">'+
+                    '<div class="row no-padding"><em class="fa fa-xl fa-navicon color-blue"></em>'+
+                        '<div class="large">'+temperaturaC+'</div>'+
+                        '<div class="text-muted">Temperatura Actual en Celsius</div>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+            '<div class="col-xs-6 col-md-3 col-lg-3 no-padding">'+
+                '<div class="panel panel-blue panel-widget border-right">'+
+                    '<div class="row no-padding"><em class="fa fa-xl fa-inbox color-orange"></em>'+
+                        '<div class="large">'+temperaturaF+'</div>'+
+                        '<div class="text-muted">Temperatura Actual en Fahrenheit</div>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+            '<div class="col-xs-6 col-md-3 col-lg-3 no-padding">'+
+                '<div class="panel panel-orange panel-widget border-right">'+
+                    '<div class="row no-padding"><em class="fa fa-xl fa-home color-teal"></em>'+
+                        '<div class="large">'+humedad+'</div>'+
+                        '<div class="text-muted">Porcentaje Humedad Actual</div>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+            '<div class="col-xs-6 col-md-3 col-lg-3 no-padding">'+
+                '<div class="panel panel-red panel-widget ">'+
+                    '<div class="row no-padding"><em class="fa fa-xl fa-search color-red"></em>'+
+                        '<div class="large">'+CantLecturas+'</div>'+
+                        '<div class="text-muted">Cantidad de lecturas</div>'+
+                    '</div>'+
+                '</div>'+
+            '</div>';
+}
+
 
 // ******************************************************************************
 // *           Funciones JS para el manejo de datos de las graficas             *
