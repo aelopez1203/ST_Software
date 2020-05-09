@@ -229,6 +229,55 @@ function arrayJSONlogin(password,id,Rol,user,correo){
     return data;
 }
 
+// ********************************************************************************
+// * Funciones JS para el Control de inicio y Detencion del servicio RaspBerry PI *
+// ********************************************************************************
+
+
+// Funcion que consulta la coleccion switch_serv en firebase
+function ConsultarSwitch_Serv(){
+    var switch_serv = firebase.database().ref("switch_serv/");
+    switch_serv.on("value",function(data){
+        var Valorswitch_serv = data.val();
+        //console.log(Valorswitch_serv);
+        //var result = SeccionOff(Valorswitch_serv.switch,Valorswitch_serv.resultado);
+        var result
+
+        if(Valorswitch_serv.switch == "true"){
+            result = SeccionSwitch('fa-toggle-on','On');
+        }
+        if(Valorswitch_serv.switch == "false"){
+            result = SeccionSwitch('fa-toggle-off','Off');
+        }
+        innerHTML("loadSwitch",result);
+    });
+}
+
+
+// Reconstruye la seccion del menu para iniciar o detener servicio Rapsberry PI
+function SeccionSwitch(clase,modo){
+    return  '<li class="active"><a href="index.html"><em class="fa fa-dashboard">&nbsp;</em> Inicio</a></li>'+
+            '<li><a href="#"><em class="fa '+clase+'">&nbsp;</em> Servicio '+modo+'</a></li>'+
+            '<li><a href="elements.html"><em class="fa fa-navicon">&nbsp;</em> Reportes</a></li>'+
+            '<li class="parent "><a data-toggle="collapse" href="#sub-item-1">'+
+                '<em class="fa fa-users">&nbsp;</em> Usuarios <span data-toggle="collapse" href="#sub-item-1" class="icon pull-right"><em class="fa fa-plus"></em></span>'+
+                '</a>'+
+                '<ul class="children collapse" id="sub-item-1">'+
+                    '<li><a class="" href="Registrar.html">'+
+                        '<span class="fa fa-arrow-right">&nbsp;</span> Registrar'+
+                    '</a></li>'+
+                    '<li><a class="" href="Modificar.html">'+
+                        '<span class="fa fa-arrow-right">&nbsp;</span> Actualizar'+
+                    '</a></li>'+
+                '</ul>'+
+            '</li>'+
+            '<li><a href="../login.html"><em class="fa fa-power-off">&nbsp;</em> Cerrar Sesión</a></li>';
+}
+
+//Actualiza en Firebase el estado del Switch
+function ChangeSwitch(){
+    
+}
 
 // ******************************************************************************
 // *           Funciones JS para la consulta de datos de Firebase               *
@@ -283,6 +332,7 @@ function DivClassInicio(temperaturaC,temperaturaF,humedad,CantLecturas){
                 '</div>'+
             '</div>';
 }
+
 
 
 // ******************************************************************************

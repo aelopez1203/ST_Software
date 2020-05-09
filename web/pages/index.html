@@ -102,22 +102,10 @@
 			<div class="clear"></div>
 		</div>
 		<div class="divider"></div>
-		<ul class="nav menu">
-			<li class="active"><a href="index.html"><em class="fa fa-dashboard">&nbsp;</em> Inicio</a></li>
-			<li><a href="elements.html"><em class="fa fa-navicon">&nbsp;</em> Reportes</a></li>
-			<li class="parent "><a data-toggle="collapse" href="#sub-item-1">
-				<em class="fa fa-users">&nbsp;</em> Usuarios <span data-toggle="collapse" href="#sub-item-1" class="icon pull-right"><em class="fa fa-plus"></em></span>
-				</a>
-				<ul class="children collapse" id="sub-item-1">
-					<li><a class="" href="Registrar.html">
-						<span class="fa fa-arrow-right">&nbsp;</span> Registrar
-					</a></li>
-					<li><a class="" href="Modificar.html">
-						<span class="fa fa-arrow-right">&nbsp;</span> Actualizar
-					</a></li>
-				</ul>
-			</li>
-			<li><a href="../login.html"><em class="fa fa-power-off">&nbsp;</em> Cerrar Sesión</a></li>
+		<ul id="loadSwitch" class="nav menu">
+
+			<!-- // Reconstruye la seccion del menu para iniciar o detener servicio Rapsberry PI -->
+
 		</ul>
 	</div>	
 	<!-- Se acaba Menu -->
@@ -222,6 +210,7 @@
 			
 			observador();
 			ConsultarTemp_Humedad();
+			ConsultarSwitch_Serv();
 
 		};
 	</script>
