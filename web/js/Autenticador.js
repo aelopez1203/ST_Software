@@ -433,19 +433,9 @@ var lineChartDataH = {
 // *                Funciones JS para el manejo de Reportes                     *
 // ******************************************************************************
 
-    document.getElementById('form1').addEventListener('submit',function(e){
-        e.preventDefault();
-        fecha_muestraHTML= document.getElementById('fecha');
-        firebase.database().ref('temperatura_humedad').push({
-            fecha_muestra: fecha_muestraHTML.value 
-        });
-        fecha_muestraHTML.value='';
-        
-    });
-
+function Resportes(){
  //Mostrar Datos de la Base
-    (()=>{
-        
+
         firebase.database().ref('temperatura_humedad_actual').on('value',function(snapshot){
             var table= document.getElementById('tablenames');
             table.innerHTML='';
@@ -469,7 +459,7 @@ var lineChartDataH = {
             }
         });
 
-        //Condicion Filtro
+        //Condicion Filtro en la tabla 
         let filterInput = document.getElementById('filter');
         filterInput.addEventListener('keyup',function(){
             let filterValue= document.getElementById('filter').value;
@@ -486,5 +476,4 @@ var lineChartDataH = {
 
             }
         });
-        
-    })();
+}
