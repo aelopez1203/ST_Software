@@ -4,9 +4,9 @@ import datetime
 import os
 
 # Funcion que envia confirmación de ejecución
-def ResponseSwitch():
+def ResponseSwitch(valor):
     # Conecta con la base de datos en Firebase
-    firebase.put('/switch_serv', 'resultado','Response')
+    firebase.put('/switch_serv', 'resultado', valor)
 
 
 os.system('pkill -f DHT11_firebase.py')
@@ -26,7 +26,9 @@ log = {
 # con el metodo post, registra los nuevos datos en la coleccion temperatura_humedad
 resultlog = firebase.post("/auditoria", log)
 
-ResponseSwitch()
+ResponseSwitch("Response");
 
 # con el metodo post, actualiza los nuevos datos en la coleccion temperatura_humedad
 firebase.put('/temperatura_humedad_actual/1', 'CantLecturas',int(0))
+
+ResponseSwitch("None");

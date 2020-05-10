@@ -12,6 +12,7 @@ var firebaseConfig = {
   };
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
+  var ValorSwitch;
 
 
 // ******************************************************************************
@@ -234,30 +235,56 @@ function arrayJSONlogin(password,id,Rol,user,correo){
 // ********************************************************************************
 
 
-// Funcion que consulta la coleccion switch_serv en firebase
-function ConsultarSwitch_Serv(){
+
+// Funcion que consulta la coleccion switch_serv en firebase Resultado
+function ConsultarSwitch_Result(tipo){
     var switch_serv = firebase.database().ref("switch_serv/");
+    var Valorswitch_serv = "";
+    var msj = "";
+
     switch_serv.on("value",function(data){
-        var Valorswitch_serv = data.val();
+        Valorswitch_serv = data.val();
+
+        
+        
+    });    
+}
+
+// Funcion que consulta la coleccion switch_serv en firebase Switch
+function ConsultarSwitch_Serv(tipo){
+    var switch_serv = firebase.database().ref("switch_serv/");
+    var Valorswitch_serv = "";
+    switch_serv.on("value",function(data){
+        Valorswitch_serv = data.val();
         //console.log(Valorswitch_serv);
         //var result = SeccionOff(Valorswitch_serv.switch,Valorswitch_serv.resultado);
         var result
 
         if(Valorswitch_serv.switch == "true"){
             result = SeccionSwitch('fa-toggle-on','On');
+            msj = "Servicio Iniciado";
+            ValorSwitch = Valorswitch_serv.switch;
         }
         if(Valorswitch_serv.switch == "false"){
             result = SeccionSwitch('fa-toggle-off','Off');
+            msj = "Servicio Detenido";
+            ValorSwitch = Valorswitch_serv.switch;
         }
-        innerHTML("loadSwitch",result);
+        if(Valorswitch_serv.resultado == "Response"){
+            alert(msj);
+        }
+        innerHTML("loadSwitch",result); 
+
+        
     });
+    
 }
 
 
 // Reconstruye la seccion del menu para iniciar o detener servicio Rapsberry PI
 function SeccionSwitch(clase,modo){
     return  '<li class="active"><a href="index.html"><em class="fa fa-dashboard">&nbsp;</em> Inicio</a></li>'+
-            '<li><a href="#"><em class="fa '+clase+'">&nbsp;</em> Servicio '+modo+'</a></li>'+
+            '<li><a href="#" onclick="ValEstActual()"><em class="fa '+clase+'">&nbsp;</em> Servicio '+modo+'</a></li>'+
             '<li><a href="elements.html"><em class="fa fa-navicon">&nbsp;</em> Reportes</a></li>'+
             '<li class="parent "><a data-toggle="collapse" href="#sub-item-1">'+
                 '<em class="fa fa-users">&nbsp;</em> Usuarios <span data-toggle="collapse" href="#sub-item-1" class="icon pull-right"><em class="fa fa-plus"></em></span>'+
@@ -274,10 +301,33 @@ function SeccionSwitch(clase,modo){
             '<li><a href="../login.html"><em class="fa fa-power-off">&nbsp;</em> Cerrar Sesión</a></li>';
 }
 
-//Actualiza en Firebase el estado del Switch
-function ChangeSwitch(){
-    
+function ValEstActual(){
+    var estado = ValorSwitch
+    var msjIni = "Servicio Iniciado";
+    var msjDet = "Servicio Detenido";
+    var result = "";
+
+    if(estado == "true"){
+        ChangeSwitch("false");
+    }
+    if(estado == "false"){
+        ChangeSwitch("true");
+    }
 }
+
+
+//Actualiza en Firebase el estado del Switch
+function ChangeSwitch(Action){
+    var switch_serv = firebase.database().ref("switch_serv/");
+    var obj = {
+        resultado : "None",
+        switch    : Action
+    }
+    switch_serv.update(obj);
+}
+
+
+
 
 // ******************************************************************************
 // *           Funciones JS para la consulta de datos de Firebase               *

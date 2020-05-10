@@ -13,9 +13,9 @@ def ConsultaCantLecturas():
     return CantLecturas
 
 # Funcion que envia confirmación de ejecución
-def ResponseSwitch():
+def ResponseSwitch(valor):
     # Conecta con la base de datos en Firebase
-    firebase.put('/switch_serv', 'resultado','Response')
+    firebase.put('/switch_serv', 'resultado',valor)
     
     
 
@@ -58,7 +58,7 @@ log = {
 # con el metodo post, registra los nuevos datos en la coleccion temperatura_humedad
 resultlog = firebase.post("/auditoria", log)
 
-ResponseSwitch()
+ResponseSwitch("Response")
 
 # Ajuste pin (BCM) para sus necesidades
 dht11 = DHT11(14)
@@ -121,6 +121,8 @@ while True:
     file.write('\n')
     
     file.close()
+    
+    ResponseSwitch("None")
     
  else:
      
