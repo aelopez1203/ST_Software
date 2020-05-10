@@ -285,7 +285,7 @@ function ConsultarSwitch_Serv(tipo){
 function SeccionSwitch(clase,modo){
     return  '<li class="active"><a href="index.html"><em class="fa fa-dashboard">&nbsp;</em> Inicio</a></li>'+
             '<li><a href="#" onclick="ValEstActual()"><em class="fa '+clase+'">&nbsp;</em> Servicio '+modo+'</a></li>'+
-            '<li><a href="elements.html"><em class="fa fa-navicon">&nbsp;</em> Reportes</a></li>'+
+            '<li><a href="Reporte.html"><em class="fa fa-navicon">&nbsp;</em> Reportes</a></li>'+
             '<li class="parent "><a data-toggle="collapse" href="#sub-item-1">'+
                 '<em class="fa fa-users">&nbsp;</em> Usuarios <span data-toggle="collapse" href="#sub-item-1" class="icon pull-right"><em class="fa fa-plus"></em></span>'+
                 '</a>'+
@@ -428,3 +428,63 @@ var lineChartDataH = {
 
 }
 
+
+// ******************************************************************************
+// *                Funciones JS para el manejo de Reportes                     *
+// ******************************************************************************
+
+    document.getElementById('form1').addEventListener('submit',function(e){
+        e.preventDefault();
+        fecha_muestraHTML= document.getElementById('fecha');
+        firebase.database().ref('temperatura_humedad').push({
+            fecha_muestra: fecha_muestraHTML.value 
+        });
+        fecha_muestraHTML.value='';
+        
+    });
+
+ //Mostrar Datos de la Base
+    (()=>{
+        
+        firebase.database().ref('temperatura_humedad_actual').on('value',function(snapshot){
+            var table= document.getElementById('tablenames');
+            table.innerHTML='';
+            var data = snapshot.val();
+            var con= 0;
+            for (const key in data) {
+                table.innerHTML+=`
+                <tr>
+                <th scope="row">
+                    ${con+1}
+                </th>
+                <td>${data[key].fecha_muestra}</td>
+                <td>${data[key].humedad}</td>
+                <td>${data[key].id_sensor}</td>
+                <td>${data[key].temperaturaC}</td>
+                <td>${data[key].temperaturaF}</td>
+                </tr>
+
+                `;
+                con++;
+            }
+        });
+
+        //Condicion Filtro
+        let filterInput = document.getElementById('filter');
+        filterInput.addEventListener('keyup',function(){
+            let filterValue= document.getElementById('filter').value;
+            var table = document.getElementById('tablenames');
+            let tr = table.querySelectorAll('tr');
+
+            for (let index = 0; index < tr.length; index++) {
+                let val = tr[index].getElementsByTagName('td')[0];
+                if (val.innerHTML.indexOf(filterValue) > -1) {
+                    tr[index].style.display='';
+                } else {
+                    tr[index].style.display='none';
+                }
+
+            }
+        });
+        
+    })();

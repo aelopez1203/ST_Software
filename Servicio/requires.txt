@@ -1,4 +1,0 @@
-RPi.GPIO
-
-[test]
-nose

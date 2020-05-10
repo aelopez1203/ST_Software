@@ -1,7 +1,0 @@
-README.md
-setup.py
-DHTxx.egg-info/PKG-INFO
-DHTxx.egg-info/SOURCES.txt
-DHTxx.egg-info/dependency_links.txt
-DHTxx.egg-info/requires.txt
-DHTxx.egg-info/top_level.txt
