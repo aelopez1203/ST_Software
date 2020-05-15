@@ -136,20 +136,15 @@
 		</div>
 
 		<!-- Inicia sección grafica Temperatura -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="panel panel-default">
-					<div class="panel-heading">
-						Monitoreo Temperatura
-						<span class="pull-right clickable panel-toggle panel-button-tab-left"><em class="fa fa-toggle-up"></em></span>
-					</div>
-					<div class="panel-body">
-						<div class="canvas-wrapper">
-							<canvas class="main-chart" id="line-chart-temperatura" height="200" width="600"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div id="loadTempG" class="row">
+			
+
+
+			
+
+
+
+
 		</div>
 		<!-- Finalia sección grafica Temperatura -->
 		<!-- Inicia sección grafica Humedad -->
@@ -192,14 +187,7 @@
 	<script src="js/custom.js"></script>
 	<script>
     	window.onload = function (){
-    	var chart1 = document.getElementById("line-chart-temperatura").getContext("2d");
-			window.myLine = new Chart(chart1).Line(lineChartDataT, {
-			responsive: true,
-			scaleLineColor: "rgba(0,0,0,.2)",
-			scaleGridLineColor: "rgba(0,0,0,.05)",
-			scaleFontColor: "#c5c7cc"
-			});
-		
+    	
 		var chart2 = document.getElementById("line-chart-humedad").getContext("2d");
 			window.myLine = new Chart(chart2).Line(lineChartDataH, {
 			responsive: true,
@@ -211,8 +199,9 @@
 			observador();
 			ConsultarTemp_Humedad();
 			ConsultarSwitch_Serv(0);
+			ConsultaDatosGraficaTiempo();
 
-		};
+		}
 	</script>
 </body>
 </html>

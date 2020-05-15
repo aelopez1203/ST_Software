@@ -342,6 +342,8 @@ function ConsultarTemp_Humedad(){
         var result = DivClassInicio(Valortemperatura_humedad_actual.temperaturaC,Valortemperatura_humedad_actual.temperaturaF,Valortemperatura_humedad_actual.humedad,Valortemperatura_humedad_actual.CantLecturas);
         console.log(result);
         innerHTML("loadTempC",result);
+        
+        ConsultaDatosGraficaTiempo();
     });
 }
 
@@ -389,44 +391,111 @@ function DivClassInicio(temperaturaC,temperaturaF,humedad,CantLecturas){
 // *           Funciones JS para el manejo de datos de las graficas             *
 // ******************************************************************************
 
+    // Funcion que trae los datos de temperatura y humedad mas recientes (Ultimos 7 registros)
+    function ConsultaDatosGraficaTiempo(){
+        var tiempo = new Array();
+        var temperatura = new Array();
+        var temperatura_humedad = firebase.database().ref("temperatura_humedad/");
+        temperatura_humedad.orderByChild("fecha_muestra").limitToLast(7).on("child_added", function(snapshot) {
+            var Valortemperatura_humedad = snapshot.val();
 
-// Variables que genera numeros aleatorios para ser usados en la grafica
-var randomScalingFactorTemperatura = function(){ return Math.round(Math.random()*1000)}; 
-var randomScalingFactorHumedad     = function(){ return Math.round(Math.random()*1000)};
+            
+            tiempo.push(Valortemperatura_humedad.hora);
+            console.log(tiempo);
 
-var lineChartDataT = {
-    labels : ["January","February","March","April","May","June","July"],
-    datasets : [
-        {
-            label: "My Firts dataset",
-            fillColor : "rgba(48, 164, 255, 0.2)",
-            strokeColor : "rgba(48, 164, 255, 1)",
-            pointColor : "rgba(48, 164, 255, 1)",
-            pointStrokeColor : "#fff",
-            pointHighlightFill : "#fff",
-            pointHighlightStroke : "rgba(48, 164, 255, 1)",
-            data : [randomScalingFactorTemperatura(),randomScalingFactorTemperatura(),randomScalingFactorTemperatura(),randomScalingFactorTemperatura(),randomScalingFactorTemperatura(),randomScalingFactorTemperatura(),randomScalingFactorTemperatura()]
-        }
-    ]
+            temperatura.push(Valortemperatura_humedad.temperaturaC);
+            console.log(temperatura);  // Revisar
 
+
+
+            var randomScalingFactorTemperatura = function(posicion){ 
+                var temp = temperatura[posicion];
+                console.log()
+                return Math.round(temp)
+            }; 
+
+            // -=========================== Sección Temperatura =============================-
+            var lineChartDataT = {
+                labels : tiempo,
+                datasets : [
+                    {
+                        label: "My Firts dataset",
+                        fillColor : "rgba(48, 164, 255, 0.2)",
+                        strokeColor : "rgba(48, 164, 255, 1)",
+                        pointColor : "rgba(48, 164, 255, 1)",
+                        pointStrokeColor : "#fff",
+                        pointHighlightFill : "#fff",
+                        pointHighlightStroke : "rgba(48, 164, 255, 1)",
+                        data : [randomScalingFactorTemperatura(0),randomScalingFactorTemperatura(1),randomScalingFactorTemperatura(2),randomScalingFactorTemperatura(3),randomScalingFactorTemperatura(4),randomScalingFactorTemperatura(5),randomScalingFactorTemperatura(6)]
+                    }
+                ]
+
+            }
+            var resulttemp = DivClassGraficaT();
+                console.log(resulttemp);
+                innerHTML("loadTempG",resulttemp);
+
+            var chart1 = document.getElementById("line-chart-temperatura").getContext("2d");
+                window.myLine = new Chart(chart1).Line(lineChartDataT, {
+                responsive: true,
+                scaleLineColor: "rgba(0,0,0,.2)",
+                scaleGridLineColor: "rgba(0,0,0,.05)",
+                scaleFontColor: "#c5c7cc"
+			    });
+
+        });
+        
+    }
+
+
+// 
+function DivClassGraficaT(){
+    return '<div class="col-md-12">'+
+				'<div class="panel panel-default">'+
+					'<div class="panel-heading">'+
+						'Monitoreo Temperatura en °C'+
+						'<span class="pull-right clickable panel-toggle panel-button-tab-left"><em class="fa fa-toggle-up"></em></span>'+
+					'</div>'+
+					'<div class="panel-body">'+
+						'<div class="canvas-wrapper">'+
+							'<canvas class="main-chart" id="line-chart-temperatura" height="200" width="600"></canvas>'+
+						'</div>'+
+					'</div>'+
+				'</div>'+
+            '</div>';
+
+            
 }
 
-var lineChartDataH = {
-    labels : ["January","February","March","April","May","June","July"],
-    datasets : [
-        {
-            label: "My First dataset",
-            fillColor : "rgba(220,220,220,0.2)",
-            strokeColor : "rgba(220,220,220,1)",
-            pointColor : "rgba(220,220,220,1)",
-            pointStrokeColor : "#fff",
-            pointHighlightFill : "#fff",
-            pointHighlightStroke : "rgba(220,220,220,1)",
-            data : [randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad()]
-        }
-    ]
 
-}
+
+
+    // Variables que genera numeros aleatorios para ser usados en la grafica
+    
+    var randomScalingFactorHumedad     = function(){ return Math.round(Math.random()*70)};
+
+
+
+
+// -=========================== Secciòn Humedad =============================-
+
+    var lineChartDataH = {
+        labels : ["January","February","March","April","May","June","July"],
+        datasets : [
+            {
+                label: "My First dataset",
+                fillColor : "rgba(220,220,220,0.2)",
+                strokeColor : "rgba(220,220,220,1)",
+                pointColor : "rgba(220,220,220,1)",
+                pointStrokeColor : "#fff",
+                pointHighlightFill : "#fff",
+                pointHighlightStroke : "rgba(220,220,220,1)",
+                data : [randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad()]
+            }
+        ]
+
+    }
+
 
 
 // ******************************************************************************
