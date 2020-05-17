@@ -114,7 +114,7 @@ function observador(){
         var providerData = user.providerData;
         }else{
             console.log('No existe usuario activo..');
-            location.href="Error/error401.html";
+            location.href="/Error/error401.html";
             console.log('Entro aqui');
         }
     });
@@ -234,8 +234,6 @@ function arrayJSONlogin(password,id,Rol,user,correo){
 // * Funciones JS para el Control de inicio y Detencion del servicio RaspBerry PI *
 // ********************************************************************************
 
-
-
 // Funcion que consulta la coleccion switch_serv en firebase Resultado
 function ConsultarSwitch_Result(tipo){
     var switch_serv = firebase.database().ref("switch_serv/");
@@ -244,9 +242,6 @@ function ConsultarSwitch_Result(tipo){
 
     switch_serv.on("value",function(data){
         Valorswitch_serv = data.val();
-
-        
-        
     });    
 }
 
@@ -315,7 +310,6 @@ function ValEstActual(){
     }
 }
 
-
 //Actualiza en Firebase el estado del Switch
 function ChangeSwitch(Action){
     var switch_serv = firebase.database().ref("switch_serv/");
@@ -326,9 +320,6 @@ function ChangeSwitch(Action){
     switch_serv.update(obj);
 }
 
-
-
-
 // ******************************************************************************
 // *           Funciones JS para la consulta de datos de Firebase               *
 // ******************************************************************************
@@ -338,18 +329,16 @@ function ConsultarTemp_Humedad(){
     var temperatura_humedad_actual = firebase.database().ref("temperatura_humedad_actual/");
     temperatura_humedad_actual.on("child_changed",function(data){
         var Valortemperatura_humedad_actual = data.val();
-        console.log(Valortemperatura_humedad_actual);
+        //console.log(Valortemperatura_humedad_actual);
         var result = DivClassInicio(Valortemperatura_humedad_actual.temperaturaC,Valortemperatura_humedad_actual.temperaturaF,Valortemperatura_humedad_actual.humedad,Valortemperatura_humedad_actual.CantLecturas);
-        console.log(result);
+        //console.log(result);
         innerHTML("loadTempC",result);
         
-        ConsultaDatosGraficaTiempo();
+        ConsultaDatosGraficaTempHum(); //Ejecuta funcion graficas
     });
 }
 
-
 // Reconstruye la seccion del DIV mostrando los datos consultados en Firebase
-
 function DivClassInicio(temperaturaC,temperaturaF,humedad,CantLecturas){
     return '<div class="col-xs-6 col-md-3 col-lg-3 no-padding">'+
                 '<div class="panel panel-teal panel-widget border-right">'+
@@ -385,70 +374,106 @@ function DivClassInicio(temperaturaC,temperaturaF,humedad,CantLecturas){
             '</div>';
 }
 
-
-
 // ******************************************************************************
 // *           Funciones JS para el manejo de datos de las graficas             *
 // ******************************************************************************
 
-    // Funcion que trae los datos de temperatura y humedad mas recientes (Ultimos 7 registros)
-    function ConsultaDatosGraficaTiempo(){
-        var tiempo = new Array();
-        var temperatura = new Array();
-        var temperatura_humedad = firebase.database().ref("temperatura_humedad/");
-        temperatura_humedad.orderByChild("fecha_muestra").limitToLast(7).on("child_added", function(snapshot) {
-            var Valortemperatura_humedad = snapshot.val();
+// Funcion que trae los datos de temperatura y humedad mas recientes (Ultimos 7 registros)
+function ConsultaDatosGraficaTempHum(){
+    var tiempo = new Array();
+    var temperatura = new Array();
+    var humedad = new Array();
+    var temperatura_humedad = firebase.database().ref("temperatura_humedad/");
+    temperatura_humedad.orderByChild("fecha_muestra").limitToLast(7).on("child_added", function(snapshot) {
+        var Valortemperatura_humedad = snapshot.val();
 
-            
-            tiempo.push(Valortemperatura_humedad.hora);
-            console.log(tiempo);
+        tiempo.push(Valortemperatura_humedad.hora);
+        //console.log(tiempo);
 
-            temperatura.push(Valortemperatura_humedad.temperaturaC);
-            console.log(temperatura);  // Revisar
+        temperatura.push(Valortemperatura_humedad.temperaturaC);
+        //console.log(temperatura);  
+
+        humedad.push(Valortemperatura_humedad.humedad);
+        //console.log(humedad); 
+
+        // Variables que genera numeros aleatorios para ser usados en la grafica
+
+        var randomScalingFactorHumedad = function(posicion){ 
+            var temp = humedad[posicion];
+            //console.log()
+            return Math.round(temp)
+        }; 
+
+        var randomScalingFactorTemperatura = function(posicion){ 
+            var temp = temperatura[posicion];
+            //console.log()
+            return Math.round(temp)
+        }; 
 
 
+        // -=========================== Sección Temperatura =============================-
+        var lineChartDataT = {
+            labels : tiempo,
+            datasets : [
+                {
+                    label: "My Firts dataset",
+                    fillColor : "rgba(48, 164, 255, 0.2)",
+                    strokeColor : "rgba(48, 164, 255, 1)",
+                    pointColor : "rgba(48, 164, 255, 1)",
+                    pointStrokeColor : "#fff",
+                    pointHighlightFill : "#fff",
+                    pointHighlightStroke : "rgba(48, 164, 255, 1)",
+                    data : [randomScalingFactorTemperatura(0),randomScalingFactorTemperatura(1),randomScalingFactorTemperatura(2),randomScalingFactorTemperatura(3),randomScalingFactorTemperatura(4),randomScalingFactorTemperatura(5),randomScalingFactorTemperatura(6)]
+                }
+            ]
+        }
 
-            var randomScalingFactorTemperatura = function(posicion){ 
-                var temp = temperatura[posicion];
-                console.log()
-                return Math.round(temp)
-            }; 
+        // -=========================== Secciòn Humedad =============================-
+        var lineChartDataH = {
+            labels : tiempo,
+            datasets : [
+                {
+                    label: "My First dataset",
+                    fillColor : "rgba(220,220,220,0.2)",
+                    strokeColor : "rgba(220,220,220,1)",
+                    pointColor : "rgba(220,220,220,1)",
+                    pointStrokeColor : "#fff",
+                    pointHighlightFill : "#fff",
+                    pointHighlightStroke : "rgba(220,220,220,1)",
+                    data : [randomScalingFactorHumedad(0),randomScalingFactorHumedad(1),randomScalingFactorHumedad(2),randomScalingFactorHumedad(3),randomScalingFactorHumedad(4),randomScalingFactorHumedad(5),randomScalingFactorHumedad(6)]
+                }
+            ]
+        }
+        // toma valor del codigo html para utilizar el Html sección temperatura
+        var resulttemp = DivClassGraficaT();
+            //console.log(resulttemp);
+            innerHTML("loadTempG",resulttemp);
 
-            // -=========================== Sección Temperatura =============================-
-            var lineChartDataT = {
-                labels : tiempo,
-                datasets : [
-                    {
-                        label: "My Firts dataset",
-                        fillColor : "rgba(48, 164, 255, 0.2)",
-                        strokeColor : "rgba(48, 164, 255, 1)",
-                        pointColor : "rgba(48, 164, 255, 1)",
-                        pointStrokeColor : "#fff",
-                        pointHighlightFill : "#fff",
-                        pointHighlightStroke : "rgba(48, 164, 255, 1)",
-                        data : [randomScalingFactorTemperatura(0),randomScalingFactorTemperatura(1),randomScalingFactorTemperatura(2),randomScalingFactorTemperatura(3),randomScalingFactorTemperatura(4),randomScalingFactorTemperatura(5),randomScalingFactorTemperatura(6)]
-                    }
-                ]
-
-            }
-            var resulttemp = DivClassGraficaT();
-                console.log(resulttemp);
-                innerHTML("loadTempG",resulttemp);
-
-            var chart1 = document.getElementById("line-chart-temperatura").getContext("2d");
-                window.myLine = new Chart(chart1).Line(lineChartDataT, {
-                responsive: true,
-                scaleLineColor: "rgba(0,0,0,.2)",
-                scaleGridLineColor: "rgba(0,0,0,.05)",
-                scaleFontColor: "#c5c7cc"
-			    });
-
+        var chart1 = document.getElementById("line-chart-temperatura").getContext("2d");
+            window.myLine = new Chart(chart1).Line(lineChartDataT, {
+            responsive: true,
+            scaleLineColor: "rgba(0,0,0,.2)",
+            scaleGridLineColor: "rgba(0,0,0,.05)",
+            scaleFontColor: "#c5c7cc"
         });
+
+        // toma valor del codigo html para utilizar el Html sección humedad
+        var resulttemp = DivClassGraficaH();
+            //console.log(resulttemp);
+            innerHTML("loadHumG",resulttemp);    
         
-    }
+        var chart2 = document.getElementById("line-chart-humedad").getContext("2d");
+            window.myLine = new Chart(chart2).Line(lineChartDataH, {
+            responsive: true,
+            scaleLineColor: "rgba(0,0,0,.2)",
+            scaleGridLineColor: "rgba(0,0,0,.05)",
+            scaleFontColor: "#c5c7cc"
+        });
+    });
+}
 
 
-// 
+// función que reconstruye sección de la grafica de temperatura
 function DivClassGraficaT(){
     return '<div class="col-md-12">'+
 				'<div class="panel panel-default">'+
@@ -462,40 +487,25 @@ function DivClassGraficaT(){
 						'</div>'+
 					'</div>'+
 				'</div>'+
-            '</div>';
-
-            
+            '</div>';       
 }
 
-
-
-
-    // Variables que genera numeros aleatorios para ser usados en la grafica
-    
-    var randomScalingFactorHumedad     = function(){ return Math.round(Math.random()*70)};
-
-
-
-
-// -=========================== Secciòn Humedad =============================-
-
-    var lineChartDataH = {
-        labels : ["January","February","March","April","May","June","July"],
-        datasets : [
-            {
-                label: "My First dataset",
-                fillColor : "rgba(220,220,220,0.2)",
-                strokeColor : "rgba(220,220,220,1)",
-                pointColor : "rgba(220,220,220,1)",
-                pointStrokeColor : "#fff",
-                pointHighlightFill : "#fff",
-                pointHighlightStroke : "rgba(220,220,220,1)",
-                data : [randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad(),randomScalingFactorHumedad()]
-            }
-        ]
-
-    }
-
+// función que reconstruye sección de la grafica de humedad
+function DivClassGraficaH(){
+    return '<div class="col-md-12">'+
+                '<div class="panel panel-default">'+
+                    '<div class="panel-heading">'+
+                        'Monitoreo Humedad'+
+                        '<span class="pull-right clickable panel-toggle panel-button-tab-left"><em class="fa fa-toggle-up"></em></span>'+
+                    '</div>'+
+                    '<div class="panel-body">'+
+                        '<div class="canvas-wrapper">'+
+                            '<canvas class="main-chart" id="line-chart-humedad" height="200" width="600"></canvas>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
+            '</div>';      
+}
 
 
 // ******************************************************************************
@@ -545,4 +555,23 @@ function Resportes(){
 
             }
         });
+}
+
+// ******************************************************************************
+// *                Funciones JS para validar estado del sensor                    *
+// ******************************************************************************
+
+// Funcion que consulta la coleccion recolecta_datos en firebase 
+function ConsultarEstadoSensor(){
+    var EstadoSensor = firebase.database().ref("recolecta_datos/");
+    var ValorEstadoSensor = "";
+    EstadoSensor.on("value",function(data){
+        ValorEstadoSensor = data.val();      
+
+        if(ValorEstadoSensor.OK == "Error_Sensor"){
+            msj = "Fallo comunicación con el Sensor DHT11";
+            alert(msj);
+        }      
+    });
+    
 }

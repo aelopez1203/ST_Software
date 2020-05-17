@@ -128,42 +128,23 @@
 
 		<div class="panel panel-container">
 			<div id="loadTempC" class="row">
-				
 				<!-- Seccion cargada por el JavaScript -->
-
-
 			</div>
 		</div>
 
 		<!-- Inicia sección grafica Temperatura -->
 		<div id="loadTempG" class="row">
-			
-
-
-			
-
-
-
-
+			<!-- Seccion cargada por el JavaScript -->
 		</div>
 		<!-- Finalia sección grafica Temperatura -->
+
+
 		<!-- Inicia sección grafica Humedad -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="panel panel-default">
-					<div class="panel-heading">
-						Monitoreo Humedad
-						<span class="pull-right clickable panel-toggle panel-button-tab-left"><em class="fa fa-toggle-up"></em></span>
-					</div>
-					<div class="panel-body">
-						<div class="canvas-wrapper">
-							<canvas class="main-chart" id="line-chart-humedad" height="200" width="600"></canvas>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div id="loadHumG" class="row">
+			<!-- Seccion cargada por el JavaScript -->
 		</div>
 		<!-- Finaliza sección grafica Humedad -->
+
 
 		<div class="col-sm-12">
 			<p class="back-link">Lumino Theme by <a href="https://www.medialoot.com">Medialoot</a></p>
@@ -187,20 +168,11 @@
 	<script src="js/custom.js"></script>
 	<script>
     	window.onload = function (){
-    	
-		var chart2 = document.getElementById("line-chart-humedad").getContext("2d");
-			window.myLine = new Chart(chart2).Line(lineChartDataH, {
-			responsive: true,
-			scaleLineColor: "rgba(0,0,0,.2)",
-			scaleGridLineColor: "rgba(0,0,0,.05)",
-			scaleFontColor: "#c5c7cc"
-			});
-			
-			observador();
+    		observador();
 			ConsultarTemp_Humedad();
 			ConsultarSwitch_Serv(0);
-			ConsultaDatosGraficaTiempo();
-
+			ConsultaDatosGraficaTempHum();
+			ConsultarEstadoSensor();
 		}
 	</script>
 </body>
