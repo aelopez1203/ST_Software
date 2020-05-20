@@ -29,6 +29,24 @@ function innerHTML(id,result){
     return document.getElementById(id).innerHTML=result;
 }
 
+// Funcion que retorna numero mayor de un arreglo
+function numeroMax(arreglo){
+    var max = Math.max.apply(null, arreglo);
+    return max;
+}
+
+// Funcion que retorna numero menor de un arreglo
+function numeroMin(arreglo){
+    var min = Math.min.apply(null, arreglo);
+    return min;
+}
+
+// Funcion que retorna numero con dos decimales
+function dosDecimales(n) {
+    let t=n.toString();
+    let regex=/(\d*.\d{0,2})/;
+    return t.match(regex)[0];
+  }
 
 // ******************************************************************************
 // *              Funciones JS Para la autenticación con Firebase               *
@@ -114,7 +132,7 @@ function observador(){
         var providerData = user.providerData;
         }else{
             console.log('No existe usuario activo..');
-            location.href="/Error/error401.html";
+            location.href="error/error401.html";
             console.log('Entro aqui');
         }
     });
@@ -418,7 +436,7 @@ function ConsultaDatosGraficaTempHum(){
                 {
                     label: "My Firts dataset",
                     fillColor : "rgba(48, 164, 255, 0.2)",
-                    strokeColor : "rgba(48, 164, 255, 1)",
+                    strokeColor : "rgba(211, 43, 43, 1)",
                     pointColor : "rgba(48, 164, 255, 1)",
                     pointStrokeColor : "#fff",
                     pointHighlightFill : "#fff",
@@ -435,7 +453,7 @@ function ConsultaDatosGraficaTempHum(){
                 {
                     label: "My First dataset",
                     fillColor : "rgba(220,220,220,0.2)",
-                    strokeColor : "rgba(220,220,220,1)",
+                    strokeColor : "rgba(48, 164, 255, 1)",
                     pointColor : "rgba(220,220,220,1)",
                     pointStrokeColor : "#fff",
                     pointHighlightFill : "#fff",
@@ -507,58 +525,8 @@ function DivClassGraficaH(){
             '</div>';      
 }
 
-
 // ******************************************************************************
-// *                Funciones JS para el manejo de Reportes                     *
-// ******************************************************************************
-
-function Resportes(){
- //Mostrar Datos de la Base
-
-        firebase.database().ref('temperatura_humedad_actual').on('value',function(snapshot){
-            var table= document.getElementById('tablenames');
-            table.innerHTML='';
-            var data = snapshot.val();
-            var con= 0;
-            for (const key in data) {
-                table.innerHTML+=`
-                <tr>
-                <th scope="row">
-                    ${con+1}
-                </th>
-                <td>${data[key].fecha_muestra}</td>
-                <td>${data[key].humedad}</td>
-                <td>${data[key].id_sensor}</td>
-                <td>${data[key].temperaturaC}</td>
-                <td>${data[key].temperaturaF}</td>
-                </tr>
-
-                `;
-                con++;
-            }
-        });
-
-        //Condicion Filtro en la tabla 
-        let filterInput = document.getElementById('filter');
-        filterInput.addEventListener('keyup',function(){
-            let filterValue= document.getElementById('filter').value;
-            var table = document.getElementById('tablenames');
-            let tr = table.querySelectorAll('tr');
-
-            for (let index = 0; index < tr.length; index++) {
-                let val = tr[index].getElementsByTagName('td')[0];
-                if (val.innerHTML.indexOf(filterValue) > -1) {
-                    tr[index].style.display='';
-                } else {
-                    tr[index].style.display='none';
-                }
-
-            }
-        });
-}
-
-// ******************************************************************************
-// *                Funciones JS para validar estado del sensor                    *
+// *                Funciones JS para validar estado del sensor                 *
 // ******************************************************************************
 
 // Funcion que consulta la coleccion recolecta_datos en firebase 
@@ -569,9 +537,343 @@ function ConsultarEstadoSensor(){
         ValorEstadoSensor = data.val();      
 
         if(ValorEstadoSensor.OK == "Error_Sensor"){
-            msj = "Fallo comunicación con el Sensor DHT11";
+            msj = "Fallo de comunicación con el Sensor DHT11";
             alert(msj);
         }      
     });
     
+}
+
+// ******************************************************************************
+// *                Funciones JS para el manejo de Reportes                     *
+// ******************************************************************************
+
+function Reportes(){
+    var fechaini   = getID("fechaini");
+    var fechafin   = getID("fechafin");
+    var ArrayTemp  = new Array();
+    var ArrayHume  = new Array();
+    var MaxTC      = 0;
+    var MinTC      = 0;
+    var PromTc     = 0;
+    var mediaT     = 0;
+    var MaxH       = 0;
+    var MinH       = 0;
+    var PromH      = 0;
+    var mediaH     = 0;
+
+    var hoy = new Date();
+    var dd = hoy.getDate();
+    var mm = hoy.getMonth()+1;
+    var yyyy = hoy.getFullYear();
+
+    if(dd<10) {
+        dd='0'+dd;
+    } 
+     
+    if(mm<10) {
+        mm='0'+mm;
+    }
+
+    var fecha_act = yyyy + "-" + mm + "-" + dd
+    console.log('Fecha actual: '+fecha_act);
+
+    if(fechaini > fecha_act){
+        alert('Fecha inicio no puede ser mayor a la actual');
+    }
+    else if(fechafin > fecha_act){
+        alert('Fecha fin no puede ser mayor a la actual');
+    }
+    else if(fechafin == ""){
+        alert('fecha fin no se admite nulo');
+    }
+    else if(fechaini == ""){
+        alert('fecha inicio no se admite nulo');
+    }
+    else if (fechaini > fechafin){
+        alert('Fecha inicio no puede ser mayor a la final');
+    }else{
+        console.log(fechaini);
+        console.log(fechafin);
+        var r_temperatura_humedad = firebase.database().ref("temperatura_humedad/");
+        r_temperatura_humedad.orderByChild("fecha_muestra").startAt(fechaini+"T00:00:00.000000").endAt(fechafin+"T23:59:59.000000")
+        .on("child_added", function(snapshot){
+            var Valorr_temperatura_humedad = snapshot.val();
+
+        //Temperatura
+            //Agrega valores al arreglo por cada iteración
+            ArrayTemp.push(Valorr_temperatura_humedad.temperaturaC);
+            //Valida por iteración cual es el numero mayor
+            MaxTC = numeroMax(ArrayTemp);
+            //Valida por iteración cual es el numero menor
+            MinTC = numeroMin(ArrayTemp);
+            //Promedio de temperatura
+            let sumT = ArrayTemp.reduce((previous, current) => current += previous);
+            PromTc  = dosDecimales(sumT / ArrayTemp.length);
+            //Media de temperatura
+            ArrayTemp.sort((a, b) => a - b);
+            let lowMiddleT = Math.floor((ArrayTemp.length - 1) / 2);
+            let highMiddleT = Math.ceil((ArrayTemp.length - 1) / 2);
+            mediaT = (ArrayTemp[lowMiddleT] + ArrayTemp[highMiddleT]) / 2;
+
+
+            console.log('Temperatura maxima es de: '+MaxTC);
+            console.log('Temperatura minima es de: '+MinTC);
+            console.log('Promedio de temperatura: ' +PromTc);
+            console.log('Media de temperatura: ' +mediaT);
+            
+        //Humedad
+            //Agrega valores al arreglo por cada iteración
+            ArrayHume.push(Valorr_temperatura_humedad.humedad);
+            //Valida por iteración cual es el numero mayor
+            MaxH = numeroMax(ArrayHume);
+            //Valida por iteración cual es el numero menor
+            MinH = numeroMin(ArrayHume);
+            //Promedio de humedad
+            let sumH = ArrayHume.reduce((previous, current) => current += previous);
+            PromH  = dosDecimales(sumH / ArrayHume.length);
+            //Media de Humedad
+            ArrayHume.sort((a, b) => a - b);
+            let lowMiddleH = Math.floor((ArrayHume.length - 1) / 2);
+            let highMiddleH = Math.ceil((ArrayHume.length - 1) / 2);
+            mediaH = (ArrayHume[lowMiddleH] + ArrayHume[highMiddleH]) / 2;
+
+
+            console.log('Humedad maxima es de: '+MaxH);
+            console.log('Humedad minima es de: '+MinH);
+            console.log('Promedio de Humedad: ' +PromH);
+            console.log('Media de humedad: ' +mediaH);
+            
+
+        });
+        
+        pdf()
+        
+    }
+}
+
+function pdf() { 
+    // Choose the element that our invoice is rendered in.
+    const element = DivClassGraficaT();
+    // Choose the element and save the PDF for our user.
+    html2pdf()
+      .set({ html2canvas: { scale: 4 } })
+      .from(element)
+      .save();
+}
+
+// función que reconstruye sección de PDF
+function DivClassGraficaT(){
+    return  '<html>																																	'+
+    '<head>                                                                                                                                 '+
+    '    <meta charset="utf-8">                                                                                                             '+
+    '    <title>A simple, clean, and responsive HTML invoice template</title>                                                               '+
+    '                                                                                                                                       '+
+    '    <style>                                                                                                                            '+
+    '    .invoice-box {                                                                                                                     '+
+    '        max-width: 800px;                                                                                                              '+
+    '        margin: auto;                                                                                                                  '+
+    '        padding: 30px;                                                                                                                 '+
+    '        border: 1px solid #eee;                                                                                                        '+
+    '        box-shadow: 0 0 10px rgba(0, 0, 0, .15);                                                                                       '+
+    '        font-size: 16px;                                                                                                               '+
+    '        line-height: 24px;                                                                                                             '+
+    '        font-family: '+"Helvetica Neue"+', '+"Helvetica"+', Helvetica, Arial, sans-serif;                                                      '+
+    '        color: #555;                                                                                                                   '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table {                                                                                                               '+
+    '        width: 100%;                                                                                                                   '+
+    '        line-height: inherit;                                                                                                          '+
+    '        text-align: left;                                                                                                              '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table td {                                                                                                            '+
+    '        padding: 5px;                                                                                                                  '+
+    '        vertical-align: top;                                                                                                           '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr td:nth-child(2) {                                                                                            '+
+    '        text-align: right;                                                                                                             '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.top table td {                                                                                               '+
+    '        padding-bottom: 20px;                                                                                                          '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.top table td.title {                                                                                         '+
+    '        font-size: 45px;                                                                                                               '+
+    '        line-height: 45px;                                                                                                             '+
+    '        color: #333;                                                                                                                   '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.information table td {                                                                                       '+
+    '        padding-bottom: 40px;                                                                                                          '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.heading td {                                                                                                 '+
+    '        background: #eee;                                                                                                              '+
+    '        border-bottom: 1px solid #ddd;                                                                                                 '+
+    '        font-weight: bold;                                                                                                             '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.details td {                                                                                                 '+
+    '        padding-bottom: 20px;                                                                                                          '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.item td{                                                                                                     '+
+    '        border-bottom: 1px solid #eee;                                                                                                 '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.item.last td {                                                                                               '+
+    '        border-bottom: none;                                                                                                           '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .invoice-box table tr.total td:nth-child(2) {                                                                                      '+
+    '        border-top: 2px solid #eee;                                                                                                    '+
+    '        font-weight: bold;                                                                                                             '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    @media only screen and (max-width: 600px) {                                                                                        '+
+    '        .invoice-box table tr.top table td {                                                                                           '+
+    '            width: 100%;                                                                                                               '+
+    '            display: block;                                                                                                            '+
+    '            text-align: center;                                                                                                        '+
+    '        }                                                                                                                              '+
+    '                                                                                                                                       '+
+    '        .invoice-box table tr.information table td {                                                                                   '+
+    '            width: 100%;                                                                                                               '+
+    '            display: block;                                                                                                            '+
+    '            text-align: center;                                                                                                        '+
+    '        }                                                                                                                              '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    /** RTL **/                                                                                                                        '+
+    '    .rtl {                                                                                                                             '+
+    '        direction: rtl;                                                                                                                '+
+    '        font-family: Tahoma, '+"Helvetica Neue"+', '+"Helvetica"+', Helvetica, Arial, sans-serif;                                              '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .rtl table {                                                                                                                       '+
+    '        text-align: right;                                                                                                             '+
+    '    }                                                                                                                                  '+
+    '                                                                                                                                       '+
+    '    .rtl table tr td:nth-child(2) {                                                                                                    '+
+    '        text-align: left;                                                                                                              '+
+    '    }                                                                                                                                  '+
+    '    </style>                                                                                                                           '+
+    '</head>                                                                                                                                '+
+    '                                                                                                                                       '+
+    '<body>                                                                                                                                 '+
+    '    <div class="invoice-box">                                                                                                          '+
+    '        <table cellpadding="0" cellspacing="0">                                                                                        '+
+    '            <tr class="top">                                                                                                           '+
+    '                <td colspan="2">                                                                                                       '+
+    '                    <table>                                                                                                            '+
+    '                        <tr>                                                                                                           '+
+    '                            <td class="title">                                                                                         '+
+    '                                <img src="" style="width:100%; max-width:300px;">            '+
+    '                            </td>                                                                                                      '+
+    '                                                                                                                                       '+
+    '                            <td>                                                                                                       '+
+    '                                Invoice #: 123<br>                                                                                     '+
+    '                                Created: January 1, 2015<br>                                                                           '+
+    '                                Due: February 1, 2015                                                                                  '+
+    '                            </td>                                                                                                      '+
+    '                        </tr>                                                                                                          '+
+    '                    </table>                                                                                                           '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="information">                                                                                                   '+
+    '                <td colspan="2">                                                                                                       '+
+    '                    <table>                                                                                                            '+
+    '                        <tr>                                                                                                           '+
+    '                            <td>                                                                                                       '+
+    '                                Sparksuite, Inc.<br>                                                                                   '+
+    '                                12345 Sunny Road<br>                                                                                   '+
+    '                                Sunnyville, CA 12345                                                                                   '+
+    '                            </td>                                                                                                      '+
+    '                                                                                                                                       '+
+    '                            <td>                                                                                                       '+
+    '                                Acme Corp.<br>                                                                                         '+
+    '                                John Doe<br>                                                                                           '+
+    '                                john@example.com                                                                                       '+
+    '                            </td>                                                                                                      '+
+    '                        </tr>                                                                                                          '+
+    '                    </table>                                                                                                           '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="heading">                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    Payment Method                                                                                                     '+
+    '                </td>                                                                                                                  '+
+    '                                                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    Check #                                                                                                            '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="details">                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    Check                                                                                                              '+
+    '                </td>                                                                                                                  '+
+    '                                                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    1000                                                                                                               '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="heading">                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    Item                                                                                                               '+
+    '                </td>                                                                                                                  '+
+    '                                                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    Price                                                                                                              '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="item">                                                                                                          '+
+    '                <td>                                                                                                                   '+
+    '                    Website design                                                                                                     '+
+    '                </td>                                                                                                                  '+
+    '                                                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    $300.00                                                                                                            '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="item">                                                                                                          '+
+    '                <td>                                                                                                                   '+
+    '                    Hosting (3 months)                                                                                                 '+
+    '                </td>                                                                                                                  '+
+    '                                                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    $75.00                                                                                                             '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="item last">                                                                                                     '+
+    '                <td>                                                                                                                   '+
+    '                    Domain name (1 year)                                                                                               '+
+    '                </td>                                                                                                                  '+
+    '                                                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                    $10.00                                                                                                             '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '                                                                                                                                       '+
+    '            <tr class="total">                                                                                                         '+
+    '                <td></td>                                                                                                              '+
+    '                                                                                                                                       '+
+    '                <td>                                                                                                                   '+
+    '                   Total: $385.00                                                                                                      '+
+    '                </td>                                                                                                                  '+
+    '            </tr>                                                                                                                      '+
+    '        </table>                                                                                                                       '+
+    '    </div>                                                                                                                             '+
+    '</body>                                                                                                                                '+
+    '</html>                                                                                                                                ';  
 }
