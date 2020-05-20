@@ -654,7 +654,7 @@ function Reportes(){
 
 function pdf() { 
     // Choose the element that our invoice is rendered in.
-    const element = DivClassGraficaT();
+    const element = DivClassReporte();
     // Choose the element and save the PDF for our user.
     html2pdf()
       .set({ html2canvas: { scale: 4 } })
@@ -663,7 +663,7 @@ function pdf() {
 }
 
 // función que reconstruye sección de PDF
-function DivClassGraficaT(){
+function DivClassReporte(){
     return  '<html>																																	'+
     '<head>                                                                                                                                 '+
     '    <meta charset="utf-8">                                                                                                             '+
